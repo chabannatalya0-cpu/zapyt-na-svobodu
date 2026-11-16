@@ -85,9 +85,9 @@
       const row = document.createElement('div'); row.className = 'q-row';
       row.innerHTML = `
         <p class="qt"><span class="num">${i + 1}.</span>${s.text}</p>
-        <div class="split">
-          <div class="t" style="flex-basis:${n ? pt : 50}%">${n ? 'ПРАВДА ' + pt + '%' : ''}</div>
-          <div class="f" style="flex-basis:${n ? pf : 50}%">${n ? 'ФЕЙК ' + pf + '%' : ''}</div>
+        <div class="split">${n ? `
+          <div class="t" style="flex-basis:${pt}%">ПРАВДА ${pt}%</div>
+          <div class="f" style="flex-basis:${pf}%">ФЕЙК ${pf}%</div>` : '<div style="flex-basis:100%;color:var(--muted)">Чекаємо на відповіді…</div>'}
         </div>
         <div class="q-meta">
           <span>Відповідей: ${n} · правда — ${t}, фейк — ${f}</span>

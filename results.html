@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Результати — «Запит на свободу прийнято»</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316224a'/%3E%3Cpath d='M16 34l11 11 22-26' fill='none' stroke='%23e0261b' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto+Condensed:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="res-body">
+  <div class="ribbon"></div>
+  <header class="res-top">
+    <div>
+      <p class="eyebrow">Онлайн-лінійка до Дня Гідності та Свободи · результати</p>
+      <h1 class="title cond">«Запит на свободу прийнято» <span class="check" style="color:var(--red)">✓</span></h1>
+      <p id="demo" class="demo-banner hidden">Демо-режим: показано приклад даних. Після підключення Google Таблиці тут будуть справжні відповіді учнів.</p>
+    </div>
+    <div class="stats">
+      <span class="pill">Учасників: <b id="n-join">0</b></span>
+      <select id="filter" class="pill" aria-label="Фільтр за класом"><option value="">Усі класи</option></select>
+      <span class="pill"><span id="dot" class="dot"></span><span id="upd">з’єднання…</span></span>
+      <button id="btn-qr" class="tool" type="button">QR для учнів</button>
+      <button id="btn-fs" class="tool" type="button">⛶ На весь екран</button>
+    </div>
+  </header>
+
+  <div id="join" class="hidden" style="padding: 0 28px 10px; display:flex; justify-content:flex-end;">
+    <div class="join">
+      <div id="qr" class="qr"></div>
+      <div><div class="lbl">Долучайся до інтерактиву:</div><div id="join-url" class="url"></div></div>
+    </div>
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="1" role="tab"><span class="n">1</span>Правда чи фейк</button>
+    <button class="tab" data-tab="2" role="tab"><span class="n">2</span>Хмара слів</button>
+    <button class="tab" data-tab="3" role="tab"><span class="n">3</span>Запит прийнято</button>
+  </nav>
+
+  <main class="panel">
+    <!-- 1 -->
+    <section id="tab1">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+        <p class="h3" style="margin:0">Як учні оцінили твердження</p>
+        <button id="btn-reveal" class="tool" type="button">Показати правильні відповіді</button>
+      </div>
+      <div id="q-grid" class="q-grid"></div>
+      <div id="q-sum" class="summary"></div>
+    </section>
+
+    <!-- 2 -->
+    <section id="tab2" class="hidden" style="flex:1; display:flex; flex-direction:column;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <p class="h3" style="margin:0">Свобода — це…</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="btn-mod" class="tool" type="button" title="Увімкніть і клацніть на слово, щоб приховати його з екрана">Модерація: вимк.</button>
+          <button id="btn-unhide" class="tool hidden" type="button">Повернути приховані</button>
+        </div>
+      </div>
+      <div class="cloud-wrap"><div id="cloud" class="cloud"></div></div>
+      <div class="cloud-foot"><span id="cloud-n"></span><span id="cloud-top"></span></div>
+    </section>
+
+    <!-- 3 -->
+    <section id="tab3" class="hidden" style="flex:1; display:flex; flex-direction:column;">
+      <div style="display:flex; justify-content:flex-end; margin:-8px 0 4px;">
+        <button id="btn-final" class="tool" type="button" title="Для фіналу лінійки: шкала стає 100 %">Фінал: показати 100 %</button>
+      </div>
+      <div class="acc">
+        <div class="acc-main">
+          <div class="counter" id="acc-n">0<small>запитів на свободу прийнято</small></div>
+          <div class="acc-note">
+            <div class="head"><svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true"><path d="M12 34l13 13 27-30" fill="none" stroke="#e0261b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="acc-title">Запит обробляється…</span></div>
+            <div class="bar"><i id="acc-bar"></i></div>
+            <div class="bar-label" id="acc-pct">0 %</div>
+          </div>
+        </div>
+        <div>
+          <p class="h3">Запити за класами</p>
+          <div id="cls-bars" class="cls-bars"></div>
+        </div>
+      </div>
+      <div id="wall" class="wall"></div>
+    </section>
+  </main>
+
+  <script src="assets/vendor/qrcode.js"></script>
+  <script src="config.js"></script>
+  <script src="assets/common.js"></script>
+  <script src="assets/results.js"></script>
+</body>
+</html>

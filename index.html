@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>«Запит на свободу прийнято» — інтерактив</title>
+  <meta name="description" content="Інтерактив онлайн-лінійки до Дня Гідності та Свободи, ліцей «Сузір’я»">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316224a'/%3E%3Cpath d='M16 34l11 11 22-26' fill='none' stroke='%23e0261b' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto+Condensed:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="ribbon"></div>
+  <div class="wrap">
+    <header class="top">
+      <p class="eyebrow">Онлайн-лінійка до Дня Гідності та Свободи</p>
+      <h1 class="title cond">«Запит на свободу прийнято» <span class="check">✓</span></h1>
+      <p id="demo" class="demo-banner hidden">Демо-режим: таблицю ще не підключено, відповіді зберігаються лише на цьому пристрої.</p>
+    </header>
+
+    <!-- Крок 0: клас -->
+    <section id="step-class" class="card">
+      <h2 class="cond">З якого ти класу?</h2>
+      <p class="sub">Обери свій клас — так ми побачимо, які класи найактивніші. Ім’я не потрібне.</p>
+      <div id="classes" class="classes"></div>
+    </section>
+
+    <section id="who" class="card hidden">
+      <div class="who">
+        <div><span class="eyebrow">Твій клас</span><br><b id="who-cls" class="cond"></b></div>
+        <button id="change-cls" class="link-btn" type="button">Змінити</button>
+      </div>
+    </section>
+
+    <!-- Вправа 1 -->
+    <section id="ex1" class="card hidden">
+      <div class="card-head"><span class="tag">Вправа 1</span><span id="ex1-status" class="tag hidden"></span></div>
+      <h2 class="cond">Правда чи фейк?</h2>
+      <p class="sub">Прочитай три твердження і познач: правда це чи фейк.</p>
+      <div id="stmts"></div>
+      <button id="ex1-send" class="primary" type="button" disabled>Надіслати відповіді</button>
+      <p id="ex1-score" class="score hidden"></p>
+      <p id="ex1-err" class="err"></p>
+    </section>
+
+    <!-- Вправа 2 -->
+    <section id="ex2" class="card hidden">
+      <div class="card-head"><span class="tag">Вправа 2</span><span id="ex2-status" class="tag hidden"></span></div>
+      <h2 class="cond">Хмара слів</h2>
+      <div id="ex2-form">
+        <p class="label-big">Свобода — це…</p>
+        <input id="word" class="field" type="text" maxlength="25" autocomplete="off" placeholder="одне слово">
+        <p class="hint">Одне слово. Твоє слово з’явиться в загальній хмарі на екрані.</p>
+        <button id="ex2-send" class="primary" type="button">Надіслати слово</button>
+        <p id="ex2-err" class="err"></p>
+      </div>
+      <div id="ex2-done" class="done-box hidden"><span class="ic">☁️</span><span id="ex2-done-text"></span></div>
+    </section>
+
+    <!-- Вправа 3 -->
+    <section id="ex3" class="card hidden">
+      <div class="card-head"><span class="tag">Вправа 3</span><span id="ex3-status" class="tag hidden"></span></div>
+      <h2 class="cond">Твій запит на свободу</h2>
+      <div id="ex3-form">
+        <p class="sub">Напиши власноруч фразу <b>«Запит на свободу прийнято»</b> і надішли її. Разом ми доведемо шкалу до 100 %.</p>
+        <input id="phrase" class="field" type="text" maxlength="60" autocomplete="off" placeholder="Запит на свободу прийнято">
+        <button id="ex3-send" class="primary red" type="button">Надіслати запит</button>
+        <p id="ex3-err" class="err"></p>
+      </div>
+      <div id="ex3-done" class="phone-note hidden">
+        <svg width="54" height="54" viewBox="0 0 64 64" aria-hidden="true"><path d="M12 34l13 13 27-30" fill="none" stroke="#e0261b" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p class="big" id="ex3-title">Запит обробляється…</p>
+        <div class="bar"><i id="ex3-bar"></i></div>
+        <p class="bar-label" id="ex3-pct">0 %</p>
+      </div>
+    </section>
+
+    <p class="foot">Відповіді анонімні: ми збираємо лише клас.<br>КЗ «Василівський ліцей «Сузір’я»» · День Гідності та Свободи</p>
+  </div>
+
+  <div id="toast" class="toast" role="status"><svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true"><path d="M12 34l13 13 27-30" fill="none" stroke="#e0261b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="toast-text">Запит прийнято</span></div>
+
+  <script src="config.js"></script>
+  <script src="assets/common.js"></script>
+  <script src="assets/student.js"></script>
+</body>
+</html>

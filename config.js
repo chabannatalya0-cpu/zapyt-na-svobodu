@@ -2,7 +2,7 @@
 window.APP_CONFIG = {
   // Адреса веб-застосунку Google Apps Script (закінчується на /exec). Як отримати — див. README.md.
   // Поки рядок порожній, сайт працює в ДЕМО-режимі: відповіді зберігаються лише в браузері.
-  API_URL: '',
+  API_URL: 'https://script.google.com/macros/s/AKfycbwCStyvVifjMGPgWkD_afGkNnUO9PkcPn8UDB0CpCSFGE77-nwLjyr_a0TM6sLHSFUzvA/exec',
 
   // Класи для вибору
   CLASSES: ['7-А', '7-Б', '8-А', '8-Б', '9-А', '9-Б', '10-А', '10-Б', '11-А', '11-Б', 'Широківська філія'],

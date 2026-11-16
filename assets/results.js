@@ -199,6 +199,10 @@
     lastWallIds = ids;
   }
 
+  // пряме посилання на вкладку: results.html?tab=2
+  const startTab = new URLSearchParams(location.search).get('tab');
+  if (['1', '2', '3'].includes(startTab)) document.querySelector(`.tab[data-tab="${startTab}"]`).click();
+
   tick();
   setInterval(tick, Math.max(3000, CFG.REFRESH_MS || 5000));
 })();

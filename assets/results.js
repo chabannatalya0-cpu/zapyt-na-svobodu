@@ -4,7 +4,8 @@
   const $ = (id) => document.getElementById(id);
   const PALETTE = ['#16224a', '#e0261b', '#0057b7', '#f28c28', '#2b3a6b', '#c98a00', '#1f8a4c'];
   const PROPER = { 'україна': 'Україна', 'європа': 'Європа', 'київ': 'Київ', 'майдан': 'Майдан', 'зсу': 'ЗСУ', 'українці': 'Українці' };
-  let DATA = null, TAB = '1', FILTER = '', REVEAL = false, MOD = false, FINAL = false;
+  let DATA = null, TAB = '1', FILTER = '', MOD = false, FINAL = false;
+  const REVEALED = new Set();                 // твердження, для яких уже показано правильну відповідь
   let hidden = new Set(getJSON('zns_hidden', []));
   let lastCloudSig = '', lastWallIds = new Set();
 
@@ -37,7 +38,19 @@
       lastCloudSig = ''; render();
     };
   });
-  $('btn-reveal').onclick = () => { REVEAL = !REVEAL; $('btn-reveal').textContent = REVEAL ? 'Сховати правильні відповіді' : 'Показати правильні відповіді'; render(); };
+  const allRevealed = () => REVEALED.size >= CFG.STATEMENTS.length;
+  function setRevealBtn() {
+    $('btn-reveal').textContent = allRevealed() ? 'Сховати всі відповіді' : 'Показати всі відповіді';
+  }
+  function toggleReveal(i) {
+    if (REVEALED.has(i)) REVEALED.delete(i); else REVEALED.add(i);
+    setRevealBtn(); render();
+  }
+  $('btn-reveal').onclick = () => {
+    if (allRevealed()) REVEALED.clear(); else CFG.STATEMENTS.forEach((s, i) => REVEALED.add(i));
+    setRevealBtn(); render();
+  };
+  setRevealBtn();
   $('btn-mod').onclick = () => {
     MOD = !MOD; $('btn-mod').classList.toggle('active', MOD);
     $('btn-mod').textContent = MOD ? 'Модерація: клацніть на слово' : 'Модерація: вимк.';
@@ -74,6 +87,8 @@
   }
 
   // ---------- 1. Правда чи фейк ----------
+  // Кожне твердження учні надсилають окремо, тому в рядку можуть бути порожні клітинки ('' — ще не відповів).
+  const answered = (r, i) => r[i + 1] === 'true' || r[i + 1] === 'fake';
   function renderQuiz() {
     const rows = byClass(DATA.quiz);
     const grid = $('q-grid'); grid.innerHTML = '';
@@ -82,6 +97,7 @@
       const f = rows.filter((r) => r[i + 1] === 'fake').length;
       const n = t + f, pt = pct(t, n), pf = n ? 100 - pt : 0;
       const right = s.answer === 'true' ? t : f;
+      const shown = REVEALED.has(i);
       const row = document.createElement('div'); row.className = 'q-row';
       row.innerHTML = `
         <p class="qt"><span class="num">${i + 1}.</span>${s.text}</p>
@@ -91,23 +107,28 @@
         </div>
         <div class="q-meta">
           <span>Відповідей: ${n} · правда — ${t}, фейк — ${f}</span>
-          <span class="answer-badge ${REVEAL ? '' : 'hide-ans'}" title="Натисніть, щоб показати">Правильна відповідь: ${s.answer === 'fake' ? 'ФЕЙК' : 'ПРАВДА'} · ${pct(right, n)}% учнів відповіли правильно</span>
+          ${shown
+            ? `<span class="answer-badge" title="Натисніть, щоб сховати">Правильна відповідь: ${s.answer === 'fake' ? 'ФЕЙК' : 'ПРАВДА'} · ${pct(right, n)}% учнів відповіли правильно</span>`
+            : '<button type="button" class="tool answer-badge" title="Показати правильну відповідь на це твердження">Показати відповідь</button>'}
         </div>`;
-      row.querySelector('.answer-badge').onclick = () => { if (!REVEAL) $('btn-reveal').click(); };
+      row.querySelector('.answer-badge').onclick = () => toggleReveal(i);
       grid.appendChild(row);
     });
     // підсумок
-    const allRight = rows.filter((r) => CFG.STATEMENTS.every((s, i) => r[i + 1] === s.answer)).length;
+    const full = rows.filter((r) => CFG.STATEMENTS.every((s, i) => answered(r, i)));
+    const allRight = full.filter((r) => CFG.STATEMENTS.every((s, i) => r[i + 1] === s.answer)).length;
     const perClass = CFG.CLASSES.map((c) => {
       const rr = DATA.quiz.filter((r) => r[0] === c);
-      const ok = rr.reduce((a, r) => a + CFG.STATEMENTS.filter((s, i) => r[i + 1] === s.answer).length, 0);
-      return { c, n: rr.length, p: rr.length ? ok / (rr.length * CFG.STATEMENTS.length) : -1 };
+      let ok = 0, cnt = 0;
+      rr.forEach((r) => CFG.STATEMENTS.forEach((s, i) => { if (answered(r, i)) { cnt++; if (r[i + 1] === s.answer) ok++; } }));
+      return { c, n: rr.length, p: cnt ? ok / cnt : -1 };
     }).filter((x) => x.n >= 3).sort((a, b) => b.p - a.p);
     const best = perClass[0];
+    const showBest = best && allRevealed();
     $('q-sum').innerHTML = `
       <div class="sum-card"><div class="v">${rows.length}</div><div class="k">учнів відповіли</div></div>
-      <div class="sum-card"><div class="v">${pct(allRight, rows.length)}%</div><div class="k">відповіли правильно на всі ${CFG.STATEMENTS.length} твердження</div></div>
-      <div class="sum-card"><div class="v">${best && REVEAL ? best.c : '—'}</div><div class="k">${best && REVEAL ? 'найточніший клас (' + Math.round(best.p * 100) + '% правильних)' : 'найточніший клас — після показу відповідей'}</div></div>`;
+      <div class="sum-card"><div class="v">${pct(allRight, full.length)}%</div><div class="k">відповіли правильно на всі ${CFG.STATEMENTS.length} твердження</div></div>
+      <div class="sum-card"><div class="v">${showBest ? best.c : '—'}</div><div class="k">${showBest ? 'найточніший клас (' + Math.round(best.p * 100) + '% правильних)' : 'найточніший клас — після показу всіх відповідей'}</div></div>`;
   }
 
   // ---------- 2. Хмара слів ----------

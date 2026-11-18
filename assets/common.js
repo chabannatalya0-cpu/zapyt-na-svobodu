@@ -55,8 +55,19 @@
     const list = db[d.type];
     const idx = list.findIndex((r) => r.id === d.id);
     if (d.type === 'join') { if (idx >= 0) list[idx].cls = d.cls; else list.push({ id: d.id, cls: d.cls }); }
+    else if (d.type === 'quiz') {
+      // кожне твердження надсилається окремо: { q, answer }; старий формат — { answers: [...] }
+      const a = idx >= 0 ? list[idx].a : CFG.STATEMENTS.map(() => '');
+      if (d.q !== undefined && d.q !== null) {
+        if (a[d.q]) return { ok: true, duplicate: true };
+        a[d.q] = d.answer === 'true' ? 'true' : 'fake';
+      } else {
+        if (idx >= 0) return { ok: true, duplicate: true };
+        a.forEach((x, i) => { a[i] = (d.answers || [])[i] === 'true' ? 'true' : 'fake'; });
+      }
+      if (idx < 0) list.push({ id: d.id, cls: d.cls, a });
+    }
     else if (idx >= 0) return { ok: true, duplicate: true };
-    else if (d.type === 'quiz') list.push({ id: d.id, cls: d.cls, a: d.answers });
     else if (d.type === 'word') list.push({ id: d.id, cls: d.cls, w: normWord(d.word), bad: isBad(d.word) });
     else if (d.type === 'request') list.push({ id: d.id, cls: d.cls, t: now });
     setJSON(DEMO_KEY, db);
@@ -85,7 +96,7 @@
     const seed = demoSeed();
     const db = getJSON(DEMO_KEY, { join: [], quiz: [], word: [], request: [] });
     seed.join.push(...db.join.map((r) => [r.cls]));
-    seed.quiz.push(...db.quiz.map((r) => [r.cls, ...r.a]));
+    seed.quiz.push(...db.quiz.map((r) => [r.cls, ...r.a.map((x) => x || '')]));
     seed.word.push(...db.word.filter((r) => !r.bad).map((r) => [r.cls, r.w]));
     seed.request.push(...db.request.map((r) => [r.cls, r.t]));
     return { ok: true, demo: true, updated: new Date().toISOString(), ...seed };

@@ -40,27 +40,45 @@
   }
   $('change-cls').onclick = () => { $('step-class').classList.remove('hidden'); $('step-class').scrollIntoView({ behavior: 'smooth' }); };
 
-  // ---------- вправа 1 ----------
-  const answers = ST.quiz ? ST.quiz.slice() : [null, null, null];
+  // ---------- вправа 1: кожне твердження надсилається окремо ----------
+  const N = CFG.STATEMENTS.length;
+  if (!Array.isArray(ST.quiz)) ST.quiz = null;
+  const sent = (i) => !!(ST.quiz && ST.quiz[i]);
+  const picks = CFG.STATEMENTS.map((s, i) => (sent(i) ? ST.quiz[i] : null)); // вибір, ще не надісланий
+  $('ex1-send').classList.add('hidden');                                     // спільна кнопка більше не потрібна
+  const ex1Sub = document.querySelector('#ex1 .sub');
+  if (ex1Sub) ex1Sub.textContent = 'Познач, правда це чи фейк, і надішли відповідь під кожним твердженням окремо.';
+
   function renderStatements() {
     const box = $('stmts'); box.innerHTML = '';
     CFG.STATEMENTS.forEach((s, i) => {
+      const done = sent(i);
       const d = document.createElement('div'); d.className = 'stmt';
       d.innerHTML = `<p><span class="num">${i + 1}.</span>${s.text}</p>
         <div class="stamps">
           <button type="button" class="stamp t" data-v="true">ПРАВДА</button>
           <button type="button" class="stamp f" data-v="fake">ФЕЙК</button>
         </div>`;
+      let send = null;
+      if (!done) {
+        send = document.createElement('button');
+        send.type = 'button'; send.className = 'primary'; send.style.marginTop = '12px';
+        send.textContent = 'Надіслати відповідь';
+        send.disabled = !picks[i];
+        const err = document.createElement('p'); err.className = 'err';
+        send.onclick = () => sendOne(i, send, err);
+        d.appendChild(send); d.appendChild(err);
+      }
       d.querySelectorAll('.stamp').forEach((b) => {
-        if (answers[i] === b.dataset.v) b.classList.add('sel');
-        b.disabled = !!ST.quiz;
+        if (picks[i] === b.dataset.v) b.classList.add('sel');
+        b.disabled = done;
         b.onclick = () => {
-          answers[i] = b.dataset.v;
+          picks[i] = b.dataset.v;
           d.querySelectorAll('.stamp').forEach((x) => x.classList.toggle('sel', x === b));
-          $('ex1-send').disabled = answers.some((a) => !a);
+          if (send) send.disabled = false;
         };
       });
-      if (ST.quiz) {
+      if (done) {
         const ok = ST.quiz[i] === s.answer;
         const v = document.createElement('div'); v.className = 'verdict ' + (ok ? 'ok' : 'no');
         v.innerHTML = `<b>${ok ? '✓ Правильно!' : '✗ Не зовсім.'} Це ${s.answer === 'fake' ? 'фейк' : 'правда'}.</b> ${s.explain}`;
@@ -68,23 +86,28 @@
       }
       box.appendChild(d);
     });
-    if (ST.quiz) {
-      const right = ST.quiz.filter((a, i) => a === CFG.STATEMENTS[i].answer).length;
-      $('ex1-send').classList.add('hidden');
+    const n = CFG.STATEMENTS.filter((s, i) => sent(i)).length;
+    if (n === N) {
+      const right = CFG.STATEMENTS.filter((s, i) => ST.quiz[i] === s.answer).length;
       $('ex1-score').classList.remove('hidden');
-      $('ex1-score').textContent = `Твій результат: ${right} з ${CFG.STATEMENTS.length}. Відповіді прийнято ✓`;
+      $('ex1-score').textContent = `Твій результат: ${right} з ${N}. Відповіді прийнято ✓`;
       markDone(1);
+    } else if (n > 0) {
+      const st = $('ex1-status');
+      st.textContent = `Надіслано ${n} з ${N}`; st.className = 'tag';
     }
   }
-  $('ex1-send').onclick = async () => {
-    const btn = $('ex1-send'); $('ex1-err').textContent = '';
+  async function sendOne(i, btn, err) {
+    if (!picks[i] || sent(i)) return;
+    err.textContent = '';
     busy(btn, true);
     try {
-      await post({ type: 'quiz', cls: ST.cls, answers });
-      ST.quiz = answers.slice(); save();
-      renderStatements(); toast('Відповіді прийнято');
-    } catch (e) { busy(btn, false); $('ex1-err').textContent = 'Не вдалося надіслати. Перевір інтернет і спробуй ще раз.'; }
-  };
+      await post({ type: 'quiz', cls: ST.cls, q: i, answer: picks[i] });
+      if (!ST.quiz) ST.quiz = CFG.STATEMENTS.map(() => null);
+      ST.quiz[i] = picks[i]; save();
+      renderStatements(); toast(`Відповідь на твердження ${i + 1} прийнято`);
+    } catch (e) { busy(btn, false); err.textContent = 'Не вдалося надіслати. Перевір інтернет і спробуй ще раз.'; }
+  }
 
   // ---------- вправа 2 ----------
   function renderWord() {
